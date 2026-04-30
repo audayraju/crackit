@@ -67,7 +67,7 @@ export default function MockInterview() {
     setIsThinking(true);
     
     try {
-      const response = await fetch("http://localhost:5000/api/interview", {
+      const response = await fetch("/api/interview/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -176,7 +176,7 @@ export default function MockInterview() {
         answer: currentAnswer,
       }].filter(a => a.answer);
 
-      const response = await fetch("http://localhost:5000/api/interview", {
+      const response = await fetch("/api/interview/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -108,7 +108,7 @@ export default function InterviewChat() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/interview", {
+      const res = await fetch("/api/interview/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -144,7 +144,7 @@ export default function InterviewChat() {
   const startInterview = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/interview", {
+      const res = await fetch("/api/interview/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -7,16 +7,15 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    skipTaskbar: true,
+    skipTaskbar: false, // Set to false so you can find the window!
     type: 'utility',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
-    // You can make this transparent/frameless later if you want a floating widget style:
-    // transparent: true,
-    // frame: false,
+    transparent: true,
+    frame: false,
   });
 
   // Load the Next.js dev server. 

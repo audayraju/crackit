@@ -50,9 +50,20 @@ export default function Sidebar({ activeRoute = "AI Interview Copilot", setActiv
         {/* PREPARE */}
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 mb-2">Prepare</span>
+          <NavItem 
+            label="Resume Builder" 
+            icon="📄" 
+            active={activeRoute === "Resume Builder"} 
+            onClick={() => setActiveRoute && setActiveRoute("Resume Builder")} 
+          />
+          <NavItem 
+            label="Coding Copilot" 
+            icon="💻" 
+            active={activeRoute === "Coding Copilot"} 
+            onClick={() => setActiveRoute && setActiveRoute("Coding Copilot")} 
+          />
           <NavItem label="Knowledge Base" icon="📚" />
           <NavItem label="Interview Reports" icon="📈" />
-          <NavItem label="Playground" icon="✨" />
         </div>
 
         {/* RESOURCES */}

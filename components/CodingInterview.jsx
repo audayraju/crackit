@@ -78,7 +78,7 @@ export default function CodingInterview() {
     setIsLoading(true);
     
     try {
-      const response = await fetch("http://localhost:5000/api/interview", {
+      const response = await fetch("/api/interview/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -183,7 +183,7 @@ public:
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/interview", {
+      const response = await fetch("/api/interview/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: prompts[type] }),
@@ -203,7 +203,7 @@ public:
     
     // Simulate code execution (in real app, use a sandbox like Judge0)
     try {
-      const response = await fetch("http://localhost:5000/api/interview", {
+      const response = await fetch("/api/interview/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

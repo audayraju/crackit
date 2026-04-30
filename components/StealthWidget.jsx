@@ -87,14 +87,27 @@ export default function StealthWidget() {
 
           setLoading(true);
 
-          // Simulated Backend upload processing wait time
-          setTimeout(() => {
-             setMessages((prev) => [...prev, { 
-               role: "ai", 
-               text: "I analyzed the screenshot! The code structure looks correct, but watch out for O(N^2) complexity on row 42." 
-             }]);
-             setLoading(false);
-          }, 1500);
+          try {
+            const res = await fetch("/api/interview/vision", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ image: imageBase64 })
+            });
+            const data = await res.json();
+            
+            setMessages((prev) => [...prev, { 
+              role: "ai", 
+              text: data.reply || "Unable to analyze the image." 
+            }]);
+          } catch (apiErr) {
+            console.error("Vision API Error:", apiErr);
+            setMessages((prev) => [...prev, { 
+              role: "ai", 
+              text: "Connection error while analyzing the screen." 
+            }]);
+          } finally {
+            setLoading(false);
+          }
         }
       } catch (err) {
         console.error("Capture Failed:", err);
@@ -155,7 +168,7 @@ export default function StealthWidget() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/interview", {
+      const res = await fetch("/api/interview/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 

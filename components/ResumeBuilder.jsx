@@ -80,7 +80,7 @@ export default function ResumeBuilder() {
 
     setIsGenerating(true);
     try {
-      const response = await fetch("http://localhost:5000/api/interview", {
+      const response = await fetch("/api/resume/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -103,7 +103,7 @@ Return ONLY the improved bullet point, nothing else. Start with a strong action 
   const generateSummary = async () => {
     setIsGenerating(true);
     try {
-      const response = await fetch("http://localhost:5000/api/interview", {
+      const response = await fetch("/api/resume/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -151,11 +151,68 @@ Make it impactful, achievement-focused, and tailored for the target role. Return
     });
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsGenerating(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/resume/parse', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Server error (${response.status}): ${text.substring(0, 100)}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        if (data.structuredData) {
+          // Merge structured data with existing empty state to prevent undefined errors
+          setResumeData(prev => ({
+            ...prev,
+            name: data.structuredData.name || prev.name,
+            email: data.structuredData.email || prev.email,
+            phone: data.structuredData.phone || prev.phone,
+            location: data.structuredData.location || prev.location,
+            linkedin: data.structuredData.linkedin || prev.linkedin,
+            github: data.structuredData.github || prev.github,
+            summary: data.structuredData.summary || prev.summary,
+            experiences: data.structuredData.experiences?.length ? data.structuredData.experiences : prev.experiences,
+            education: data.structuredData.education?.length ? data.structuredData.education : prev.education,
+            skills: {
+              technical: data.structuredData.skills?.technical || prev.skills.technical,
+              soft: data.structuredData.skills?.soft || prev.skills.soft
+            },
+            projects: data.structuredData.projects?.length ? data.structuredData.projects : prev.projects
+          }));
+          setActiveSection("personal");
+        } else {
+          // Fallback if AI structuring failed
+          setResumeData({ ...resumeData, summary: "EXTRACTED RAW TEXT:\n\n" + data.text.substring(0, 1000) });
+          setActiveSection("summary");
+        }
+      } else {
+        throw new Error(data.error || "Unknown parsing error");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to parse PDF: " + err.message);
+    }
+    setIsGenerating(false);
+  };
+
   // Input Form
   if (step === "input") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white">
-        <div className="max-w-6xl mx-auto p-6">
+      <div className="flex-1 h-full overflow-y-auto bg-gradient-to-b from-slate-900 to-slate-800 text-white relative">
+        <div className="max-w-6xl mx-auto p-6 pt-20">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -165,11 +222,12 @@ Make it impactful, achievement-focused, and tailored for the target role. Return
             <div className="flex gap-3">
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 border border-slate-600 rounded-lg hover:bg-slate-700 transition"
+                disabled={isGenerating}
+                className="px-4 py-2 border border-slate-600 rounded-lg hover:bg-slate-700 transition disabled:opacity-50"
               >
-                📤 Import Resume
+                {isGenerating ? "Processing..." : "📤 Import Resume"}
               </button>
-              <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,.doc,.docx" />
+              <input ref={fileInputRef} onChange={handleFileUpload} type="file" className="hidden" accept=".pdf" />
               <button
                 onClick={generateFullResume}
                 disabled={!resumeData.name || isGenerating}
@@ -630,7 +688,7 @@ Make it impactful, achievement-focused, and tailored for the target role. Return
   // Preview Phase
   if (step === "preview" && generatedResume) {
     return (
-      <div className="min-h-screen bg-slate-100">
+      <div className="flex-1 h-full overflow-y-auto bg-slate-100 relative">
         {/* Toolbar */}
         <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between sticky top-0 z-50">
           <button

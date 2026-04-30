@@ -1,16 +1,30 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createClient } from '../utils/supabase/client';
 
-export default function CopilotLaunchpad({ onBack, onCreateNewProfile }) {
+export default function CopilotLaunchpad({ onBack, onCreateNewProfile, onLaunch }) {
   const [step, setStep] = useState(1);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [selectedDomain, setSelectedDomain] = useState(null);
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const profiles = [
-    { id: 1, name: 'Apple', role: 'Software Engineer', icon: '🍎' },
-    { id: 2, name: 'JP Morgan', role: 'Associate', icon: '🏦' },
-    { id: 3, name: 'Google', role: 'Data Scientist', icon: '🔍' },
-  ];
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function fetchProfiles() {
+      const { data, error } = await supabase
+        .from('interview_profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (data) {
+        setProfiles(data);
+      }
+      setLoading(false);
+    }
+    fetchProfiles();
+  }, []);
 
   const domains = [
     { id: 'general', name: 'General Interview', desc: 'Behavioral, Conceptual...', icon: '🧠' },
@@ -53,7 +67,7 @@ export default function CopilotLaunchpad({ onBack, onCreateNewProfile }) {
                <StepItem 
                  number={1} 
                  title="Select Interview Profile" 
-                 desc={selectedProfile ? `${selectedProfile.name} - ${selectedProfile.role}` : "Who are you interviewing with?"} 
+                 desc={selectedProfile ? `${selectedProfile.company_name} - ${selectedProfile.position_title}` : "Who are you interviewing with?"} 
                  active={step === 1}
                  completed={step > 1}
                  onClick={() => setStep(1)}
@@ -79,6 +93,7 @@ export default function CopilotLaunchpad({ onBack, onCreateNewProfile }) {
 
           <button 
             disabled={step < 3}
+            onClick={onLaunch}
             className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition ${step === 3 ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-md transform hover:-translate-y-1' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
           >
             🚀 Launch
@@ -96,28 +111,32 @@ export default function CopilotLaunchpad({ onBack, onCreateNewProfile }) {
                  </span>
                </div>
                
-               <div className="flex gap-4 justify-center mb-8">
-                 {profiles.map(p => (
-                   <div 
-                     key={p.id}
-                     onClick={() => { setSelectedProfile(p); setStep(2); }}
-                     className={`w-40 h-56 rounded-3xl border-2 p-4 flex flex-col items-center justify-between cursor-pointer transition-all hover:-translate-y-2 group ${
-                       selectedProfile?.id === p.id 
-                         ? 'border-purple-600 bg-purple-50 shadow-md ring-4 ring-purple-100' 
-                         : 'border-slate-200 bg-white hover:border-purple-300 shadow-sm'
-                     }`}
-                   >
-                     <div className="text-center mt-2">
-                       <h3 className="font-bold text-lg text-slate-800">{p.name}</h3>
-                       <div className="text-4xl my-4 group-hover:scale-110 transition">{p.icon}</div>
-                       <p className="text-xs text-slate-500 font-medium">{p.role}</p>
+               {loading ? (
+                 <div className="flex justify-center items-center h-56 w-full text-slate-400">Loading your profiles...</div>
+               ) : (
+                 <div className="flex gap-4 justify-center mb-8 flex-wrap">
+                   {profiles.map(p => (
+                     <div 
+                       key={p.id}
+                       onClick={() => { setSelectedProfile(p); setStep(2); }}
+                       className={`w-40 h-56 rounded-3xl border-2 p-4 flex flex-col items-center justify-between cursor-pointer transition-all hover:-translate-y-2 group ${
+                         selectedProfile?.id === p.id 
+                           ? 'border-purple-600 bg-purple-50 shadow-md ring-4 ring-purple-100' 
+                           : 'border-slate-200 bg-white hover:border-purple-300 shadow-sm'
+                       }`}
+                     >
+                       <div className="text-center mt-2">
+                         <h3 className="font-bold text-lg text-slate-800 line-clamp-1" title={p.company_name}>{p.company_name}</h3>
+                         <div className="text-4xl my-4 group-hover:scale-110 transition">🏢</div>
+                         <p className="text-xs text-slate-500 font-medium line-clamp-2" title={p.position_title}>{p.position_title}</p>
+                       </div>
+                       <div className="w-full text-center text-[10px] uppercase font-bold text-green-600 bg-green-100 rounded-full py-1">
+                         ✓ Saved
+                       </div>
                      </div>
-                     <div className="w-full text-center text-[10px] uppercase font-bold text-purple-600 bg-purple-100 rounded-full py-1">
-                       ✓ Sample Profile
-                     </div>
-                   </div>
-                 ))}
-               </div>
+                   ))}
+                 </div>
+               )}
 
                <div className="text-center mb-6">
                  <span className="text-slate-400 text-sm font-medium">Or use your own for personalized experience</span>
@@ -173,7 +192,7 @@ export default function CopilotLaunchpad({ onBack, onCreateNewProfile }) {
                </div>
                <h3 className="text-2xl font-bold text-slate-800 mb-2">Ready to Launch</h3>
                <p className="text-slate-500 text-center max-w-sm mb-8">
-                 You have selected <span className="font-bold text-slate-700">{selectedProfile?.name}</span> for a <span className="font-bold text-slate-700">{domains.find(d=>d.id===selectedDomain)?.name}</span>. Click Launch to start the copilot.
+                 You have selected <span className="font-bold text-slate-700">{selectedProfile?.company_name}</span> for a <span className="font-bold text-slate-700">{domains.find(d=>d.id===selectedDomain)?.name}</span>. Click Launch to start the copilot.
                </p>
             </div>
           )}
