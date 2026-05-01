@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 
 export default function CrackAIPage() {
@@ -97,7 +97,7 @@ export default function CrackAIPage() {
           <a href="/stealth" className="hidden sm:flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg text-sm font-medium transition">
             ðŸ¥· Stealth
           </a>
-          <a href="/onboarding" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2 rounded-xl text-sm font-medium shadow-lg shadow-blue-500/25 transition">
+          <a href="/dashboard" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2 rounded-xl text-sm font-medium shadow-lg shadow-blue-500/25 transition">
             Get Started
           </a>
         </div>
@@ -129,10 +129,10 @@ export default function CrackAIPage() {
         </p>
 
         <div className="flex flex-wrap justify-center gap-4 mb-12">
-          <a href="/onboarding" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 transition-all hover:scale-105">
+          <a href="/dashboard" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 transition-all hover:scale-105">
             Get Started Free
           </a>
-          <a href="/stealth" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-2 shadow-xl shadow-purple-500/25 hover:shadow-purple-500/40 transition-all hover:scale-105">
+          <a href="/dashboard" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-2 shadow-xl shadow-purple-500/25 hover:shadow-purple-500/40 transition-all hover:scale-105">
             ðŸ¥· Try Stealth Mode
           </a>
         </div>
@@ -441,10 +441,10 @@ export default function CrackAIPage() {
           Join 100,000+ job seekers who've transformed their interview performance with CrackAI
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <a href="/onboarding" className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition shadow-xl">
+          <a href="/dashboard" className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition shadow-xl">
             Get Started Free
           </a>
-          <a href="/mock" className="border-2 border-white/50 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 transition">
+          <a href="/dashboard" className="border-2 border-white/50 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 transition">
             Try Mock Interview
           </a>
         </div>

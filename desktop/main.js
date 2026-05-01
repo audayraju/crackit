@@ -18,9 +18,15 @@ function createWindow() {
     frame: false,
   });
 
-  // Load the Next.js dev server. 
-  // Normally you'd conditionally load a file:// URL in production.
-  mainWindow.loadURL('http://localhost:3000');
+  // If packaged (production), load the remote Firebase URL.
+  // Otherwise, load localhost for development.
+  const isDev = !app.isPackaged;
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:3000');
+  } else {
+    // Production Firebase URL
+    mainWindow.loadURL('https://crackit-c11df.web.app');
+  }
 
   // Anti-Analysis & Stealth: Hide this window from screen recorders (like OBS)
   // This matches Verve AI's `mainWindow.setContentProtection(true)`

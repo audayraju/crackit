@@ -9,7 +9,29 @@
     "start": "next start",
     "lint": "next lint",
     "dev:electron": "electron .",
-    "dev:desktop": "concurrently \"npm run dev\" \"npm run dev:electron\""
+    "dev:desktop": "concurrently \"npm run dev\" \"npm run dev:electron\"",
+    "build:desktop": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.crackai.desktop",
+    "productName": "CrackAI",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "files": [
+      "desktop/**/*",
+      "package.json"
+    ]
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",

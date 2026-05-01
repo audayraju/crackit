@@ -11,7 +11,23 @@ export default function StealthWidget() {
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [autoMode, setAutoMode] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Auto-Mode Automation: Captures screen every 30 seconds if enabled
+  useEffect(() => {
+    let interval;
+    if (autoMode) {
+      takeScreenshot();
+      interval = setInterval(() => {
+        takeScreenshot();
+      }, 30000); 
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [autoMode]);
+
   const recognitionRef = useRef(null);
   const widgetRef = useRef(null);
 
@@ -369,6 +385,15 @@ export default function StealthWidget() {
             title="Desktop capture"
           >
             📸 Capture
+          </button>
+          <button
+            onClick={() => setAutoMode(!autoMode)}
+            className={`no-drag text-xs px-3 py-1.5 rounded-lg transition ${
+              autoMode ? "bg-green-600 text-white animate-pulse" : "bg-white/5 hover:bg-white/10 text-white/70"
+            }`}
+            title="Auto-capture every 30s"
+          >
+            ✨ {autoMode ? "Auto: ON" : "Auto"}
           </button>
           <button
             onClick={() => {
