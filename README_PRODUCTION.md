@@ -11,7 +11,7 @@ CrackAI is composed of two main parts:
 ### Tech Stack
 - **Frontend:** Next.js 14, Tailwind CSS, Framer Motion.
 - **Backend:** Next.js API Routes (hosted as Firebase Cloud Functions).
-- **Database & Auth:** Supabase.
+- **Database & Auth:** Firebase (Firestore & Auth).
 - **AI Engine:** OpenRouter (using `google/gemini-1.5-flash` for vision and text).
 - **Desktop:** Electron.
 
@@ -31,8 +31,9 @@ The desktop app is packaged using `electron-builder`.
 
 Ensure the following variables are set in your `.env.local` (for development) and in your Firebase/Supabase consoles (for production):
 - `OPENROUTER_API_KEY`: Your API key from OpenRouter.
-- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL.
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key.
+- `NEXT_PUBLIC_FIREBASE_API_KEY`: Your Firebase API key.
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`: Your Firebase project ID.
+- (And other NEXT_PUBLIC_FIREBASE_* variables)
 
 ## 🥷 Stealth Mode Features
 - **Transparency Slider:** Adjust opacity to make the widget virtually invisible to others.
