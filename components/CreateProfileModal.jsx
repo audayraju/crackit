@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from 'react';
-import { createClient } from '../utils/supabase/client';
+import { auth, db, storage } from '../lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function CreateProfileModal({ onClose, onProfileCreated }) {
   const [file, setFile] = useState(null);
@@ -12,8 +14,6 @@ export default function CreateProfileModal({ onClose, onProfileCreated }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const supabase = createClient();
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,41 +38,29 @@ export default function CreateProfileModal({ onClose, onProfileCreated }) {
 
     try {
       // 1. Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
+      const user = auth.currentUser;
+      if (!user) throw new Error("You must be logged in to create a profile.");
 
-      // 2. Upload resume to Supabase Storage
+      // 2. Upload resume to Firebase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
+      const filePath = `resumes/${user.uid}/${fileName}`;
+      const storageRef = ref(storage, filePath);
 
-      const { error: uploadError } = await supabase.storage
-        .from('resumes')
-        .upload(filePath, file);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
 
-      if (uploadError) throw uploadError;
-
-      // Get public URL for the uploaded resume
-      const { data: { publicUrl } } = supabase.storage
-        .from('resumes')
-        .getPublicUrl(filePath);
-
-      // 3. Save interview profile to Database
-      const { error: dbError } = await supabase
-        .from('interview_profiles')
-        .insert([
-          {
-            user_id: user.id,
-            resume_url: publicUrl,
-            resume_name: file.name,
-            company_name: formData.companyName,
-            company_description: formData.companyDescription,
-            position_title: formData.positionTitle,
-            job_description: formData.jobDescription
-          }
-        ]);
-
-      if (dbError) throw dbError;
+      // 3. Save interview profile to Firestore
+      await addDoc(collection(db, 'interview_profiles'), {
+        user_id: user.uid,
+        resume_url: downloadURL,
+        resume_name: file.name,
+        company_name: formData.companyName,
+        company_description: formData.companyDescription,
+        position_title: formData.positionTitle,
+        job_description: formData.jobDescription,
+        created_at: serverTimestamp()
+      });
 
       // Success! Close modal and refresh UI if needed
       if (onProfileCreated) onProfileCreated();

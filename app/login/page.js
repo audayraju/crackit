@@ -1,12 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { login, signup } from './actions'
+import { useRouter } from 'next/navigation'
+import { auth } from '../../lib/firebase'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -14,14 +17,23 @@ export default function LoginPage() {
     setError(null)
     
     const formData = new FormData(e.currentTarget)
+    const email = formData.get('email')
+    const password = formData.get('password')
+    const name = formData.get('name')
     
     try {
-      const result = isLogin ? await login(formData) : await signup(formData)
-      if (result?.error) {
-        setError(result.error)
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password)
+      } else {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+        await updateProfile(userCredential.user, {
+          displayName: name
+        })
       }
+      router.push('/dashboard')
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.')
+      console.error(err)
+      setError(err.message || 'An unexpected error occurred. Please try again.')
     } finally {
       setLoading(false)
     }

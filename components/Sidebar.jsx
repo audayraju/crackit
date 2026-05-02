@@ -1,7 +1,29 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { auth } from '../lib/firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 export default function Sidebar({ activeRoute = "AI Interview Copilot", setActiveRoute }) {
+  const [user, setUser] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/login');
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
     <div className="w-64 flex-shrink-0 h-screen bg-[#f8f9fa] border-r border-[#e9ecef] flex flex-col p-4 overflow-y-auto" style={{ paddingTop: '50px' }}>
       {/* Brand */}
@@ -13,10 +35,10 @@ export default function Sidebar({ activeRoute = "AI Interview Copilot", setActiv
       {/* User Profile */}
       <div className="flex items-center gap-3 p-3 bg-white border border-slate-200 shadow-sm rounded-xl mb-8 cursor-pointer hover:shadow-md transition">
         <div className="w-10 h-10 rounded-full bg-slate-200 flex-shrink-0 overflow-hidden">
-           <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Uday&backgroundColor=e2e8f0" alt="avatar" />
+           <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.displayName || 'Uday'}&backgroundColor=e2e8f0`} alt="avatar" />
         </div>
         <div className="flex flex-col">
-          <span className="text-sm font-semibold text-slate-800">Uday Raju</span>
+          <span className="text-sm font-semibold text-slate-800 truncate w-32">{user?.displayName || user?.email?.split('@')[0] || 'User'}</span>
           <span className="text-[11px] text-slate-500 font-medium">Manage Account (Free Plan)</span>
         </div>
       </div>
@@ -73,6 +95,16 @@ export default function Sidebar({ activeRoute = "AI Interview Copilot", setActiv
           <NavItem label="AI Tools" icon="🛠️" />
           <NavItem label="Help Center" badge="Updated" icon="❓" />
         </div>
+      </div>
+
+      {/* Logout */}
+      <div className="mt-auto pt-4 border-t border-slate-200">
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2 text-sm font-semibold text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition"
+        >
+          <span>🚪</span> Logout
+        </button>
       </div>
     </div>
   );

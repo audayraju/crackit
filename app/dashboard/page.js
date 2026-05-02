@@ -1,6 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { auth } from "../../lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import Sidebar from "../../components/Sidebar";
 import Dashboard from "../../components/Dashboard";
 import CopilotLaunchpad from "../../components/CopilotLaunchpad";
@@ -13,7 +15,27 @@ export default function DashboardPage() {
   const [activeRoute, setActiveRoute] = useState("AI Interview Copilot");
   const [showLaunchpad, setShowLaunchpad] = useState(false);
   const [showCreateProfile, setShowCreateProfile] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/login");
+      } else {
+        setCheckingAuth(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
+  if (checkingAuth) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-slate-900">
+        <div className="text-white text-xl animate-pulse">Checking credentials...</div>
+      </div>
+    );
+  }
 
   const handleLaunchCopilot = () => {
     setShowLaunchpad(true);

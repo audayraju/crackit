@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { createClient } from '../utils/supabase/client';
+import { auth, db } from '../lib/firebase';
+import { collection, query, orderBy, getDocs, where } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function CopilotLaunchpad({ onBack, onCreateNewProfile, onLaunch }) {
   const [step, setStep] = useState(1);
@@ -9,21 +11,29 @@ export default function CopilotLaunchpad({ onBack, onCreateNewProfile, onLaunch 
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const supabase = createClient();
-
   useEffect(() => {
-    async function fetchProfiles() {
-      const { data, error } = await supabase
-        .from('interview_profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (data) {
-        setProfiles(data);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const q = query(
+            collection(db, 'interview_profiles'),
+            where('user_id', '==', user.uid),
+            orderBy('created_at', 'desc')
+          );
+          const querySnapshot = await getDocs(q);
+          const profilesData = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setProfiles(profilesData);
+        } catch (error) {
+          console.error("Error fetching profiles:", error);
+        }
       }
       setLoading(false);
-    }
-    fetchProfiles();
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const domains = [

@@ -1,33 +1,40 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { createClient } from '../utils/supabase/client';
+import { auth, db } from '../lib/firebase';
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function Dashboard({ onLaunch }) {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('');
-  
-  const supabase = createClient();
 
   useEffect(() => {
-    async function fetchData() {
-      // Get user
-      const { data: { user } } = await supabase.auth.getUser();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUserName(user.user_metadata?.full_name?.split(' ')[0] || user.email.split('@')[0]);
-      }
+        setUserName(user.displayName?.split(' ')[0] || user.email.split('@')[0]);
 
-      // Get recent profiles
-      const { data } = await supabase
-        .from('interview_profiles')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(3);
-      
-      if (data) setProfiles(data);
+        try {
+          // Get recent profiles from Firestore
+          const q = query(
+            collection(db, 'interview_profiles'),
+            orderBy('created_at', 'desc'),
+            limit(3)
+          );
+          const querySnapshot = await getDocs(q);
+          const profilesData = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setProfiles(profilesData);
+        } catch (error) {
+          console.error("Error fetching profiles:", error);
+        }
+      }
       setLoading(false);
-    }
-    fetchData();
+    });
+
+    return () => unsubscribe();
   }, []);
   return (
     <div className="flex-1 p-8 bg-slate-50 min-h-screen text-slate-800 flex flex-col" style={{ paddingTop: '60px' }}>
